@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"flag"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"strings"
@@ -15,86 +17,112 @@ import (
 )
 
 var (
-	addr                   = "127.0.0.1:8080"
-	dburi                  = "mongodb://127.0.0.1:27017"
-	dbtimeout              = 1 * time.Second
+	SrvAddr                string
+	DBURI                  string
+	DBName                 string
+	DBTimeout              = 10 * time.Second
+	ProductsCollectionName = "products"
 	DBClient               *mongo.Client
 	DB                     *mongo.Database
-	DBName                 = "shop"
-	ProductsCollectionName = "products"
 	Products               *mongo.Collection
 )
 
 func main() {
+	// Params
+	flag.StringVar(&SrvAddr, "a", "127.0.0.1:8081", "server addr string, example: '127.0.0.1:8081'")
+	flag.StringVar(&DBURI, "d", "127.0.0.1:27017", "mongo db server addr string, example: '127.0.0.1:27017'")
+	flag.StringVar(&DBName, "n", "shop", "mongo db name, example: 'shop'")
+	flag.Parse()
+
 	// Database
-	DBClient, err := mongo.NewClient(
-		options.Client().ApplyURI(dburi))
+	uri := fmt.Sprintf("mongodb://%v", DBURI)
+	DBClient, err := mongo.NewClient(options.Client().ApplyURI(uri))
 	if err != nil {
-		log.Fatalf("DB %v err: %v", dburi, err)
+		log.Fatalf("DB %v err: %v", DBURI, err)
 	}
-	ctx, _ := context.WithTimeout(context.Background(), dbtimeout)
+
+	ctx, fin := context.WithTimeout(context.Background(), DBTimeout)
 	if err := DBClient.Connect(ctx); err != nil {
 		log.Fatalf("DB Connect:%v", err)
 	}
-	defer DBClient.Disconnect(ctx)
+	defer func() {
+		if err := DBClient.Disconnect(ctx); err != nil {
+			log.Fatal(err)
+		}
+		fin()
+	}()
+
 	DB = DBClient.Database(DBName)
 	Products = DB.Collection(ProductsCollectionName)
 
 	// HTTP Server
 	http.Handle("/", http.FileServer(http.Dir("static")))
 	http.HandleFunc("/product", product)
-	log.Println("Server starts at:", addr)
-	if err := http.ListenAndServe(addr, nil); err != nil {
+
+	log.Println("Server starts at:", SrvAddr)
+	if err := http.ListenAndServe(SrvAddr, nil); err != nil {
 		log.Fatalf("ListenAndServe:%v", err)
 	}
 }
 
 // GET http://host:port/product?slug=wheel-barrow-9092
-func product(res http.ResponseWriter, req *http.Request) {
-	if http.MethodGet != req.Method {
-		res.WriteHeader(http.StatusMethodNotAllowed)
-		fmt.Fprintf(res, "%v is not allowed.", req.Method)
+func product(w http.ResponseWriter, r *http.Request) {
+	defer func() {
+		if err := recover(); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprint(w, "panic")
+			log.Println("product handler", err)
+			return
+		}
+	}()
+
+	if http.MethodGet != r.Method {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		fmt.Fprintf(w, "%v is not allowed.", r.Method)
 		return
 	}
 
-	q := req.URL.Query()
+	q := r.URL.Query()
 	if len(q["slug"]) == 0 {
-		res.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(res, "%v slug parameter must be specified", req.URL)
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "%v slug parameter must be specified", r.URL)
 		return
 	}
 
 	slug := strings.TrimSpace(q["slug"][0])
 	if "" == slug {
-		res.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(res, "%v slug parameter must be not empty", req.URL)
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "%v slug parameter must be not empty", r.URL)
 		return
 	}
 
 	product, err := getProduct(slug)
 	if err != nil {
-		res.WriteHeader(http.StatusNotFound)
-		log.Printf("%v getProduct %v", req.URL, err)
-		fmt.Fprintf(res, "%v", err)
+		w.WriteHeader(http.StatusNotFound)
+		log.Printf("%v getProduct %v", r.URL, err)
+		fmt.Fprintf(w, "%v", err)
 		return
 	}
 
 	log.Println("Found product", product)
 
-	bytproduct, err := json.Marshal(product)
+	b, err := json.Marshal(product)
 	if err != nil {
 		log.Printf("Marshal err: %v", err)
-		res.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(res, "err with product, slug %v", slug)
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "err with product, slug %v", slug)
 		return
 	}
 
-	res.WriteHeader(http.StatusOK)
-	fmt.Fprint(res, bytproduct)
+	w.WriteHeader(http.StatusOK)
+	io.WriteString(w, string(b))
 }
 
+// getProduct - return one product
 func getProduct(slug string) (map[string]interface{}, error) {
-	r := Products.FindOne(context.TODO(), bson.M{
+	ctx, fin := context.WithTimeout(context.Background(), DBTimeout)
+	defer fin()
+	r := Products.FindOne(ctx, bson.M{
 		"slug": slug,
 	})
 	if err := r.Err(); err != nil {
