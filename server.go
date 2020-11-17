@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -58,6 +59,7 @@ func main() {
 	// HTTP Server
 	http.Handle("/", http.FileServer(http.Dir("static")))
 	http.HandleFunc("/product", product)
+	http.HandleFunc("/products", products)
 
 	log.Println("Server starts at:", SrvAddr)
 	if err := http.ListenAndServe(SrvAddr, nil); err != nil {
@@ -82,14 +84,7 @@ func product(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	q := r.URL.Query()
-	if len(q["slug"]) == 0 {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "%v slug parameter must be specified", r.URL)
-		return
-	}
-
-	slug := strings.TrimSpace(q["slug"][0])
+	slug := strings.TrimSpace(r.URL.Query().Get("slug"))
 	if "" == slug {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "%v slug parameter must be not empty", r.URL)
@@ -135,4 +130,62 @@ func getProduct(slug string) (map[string]interface{}, error) {
 	}
 
 	return p, nil
+}
+
+// products - handle products request
+func products(w http.ResponseWriter, r *http.Request) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println("products panic", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprint(w, "not found products")
+			return
+		}
+	}()
+
+	if http.MethodGet != r.Method {
+		log.Println("products is GET method")
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		fmt.Fprint(w, "method is not allowed")
+		return
+	}
+
+	pageStr := r.URL.Query().Get("page")
+	if "" == pageStr {
+		log.Println("products page parameter is empty")
+		w.WriteHeader(http.StatusNotFound)
+		fmt.Fprint(w, "page parameter must be not empty")
+		return
+	}
+	page, err := strconv.ParseInt(pageStr, 10, 64)
+	if err != nil {
+		log.Println("products ParseInt", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, "not found products")
+		return
+	}
+
+	products, err := getProducts(int(page))
+	if err != nil {
+		log.Println("products getProducts", page, err)
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, "not found products")
+		return
+	}
+
+	b, err := json.Marshal(products)
+	if err != nil {
+		log.Println("products Marshal", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, "not found products")
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprint(w, string(b))
+}
+
+// getProducts - returns many products page by page
+func getProducts(page int) ([]map[string]interface{}, error) {
+	return []map[string]interface{}{}, nil
 }
