@@ -17,8 +17,8 @@ var (
 	Books  *mongo.Collection
 )
 
-// Init ...
-func Init(ctx context.Context, uri string) {
+// Connect - open Client connection
+func Connect(ctx context.Context, uri string) {
 	Client, err := mongo.NewClient(options.Client().ApplyURI(uri))
 	if err != nil {
 		log.Fatalf("DB %v err: %v", uri, err)
@@ -29,6 +29,11 @@ func Init(ctx context.Context, uri string) {
 	}
 	DB = Client.Database("bookstore")
 	Books = DB.Collection("books")
+}
+
+// Disconnect - close Client connection
+func Disconnect(ctx context.Context) {
+	Client.Disconnect(ctx)
 }
 
 // Book - Model Entity
