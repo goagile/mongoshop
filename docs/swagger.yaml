@@ -1,0 +1,29 @@
+basePath: /api/v1
+definitions:
+  db.Book:
+    properties:
+      author:
+        type: string
+      title:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: Books API for Golang Project.
+  title: Books API
+  version: "1.0"
+paths:
+  /books:
+    get:
+      description: Find All Books
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/db.Book'
+      summary: Find Books
+      tags:
+      - books
+swagger: "2.0"

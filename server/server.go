@@ -8,8 +8,16 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/goagile/mongoshop/db"
+
+	_ "github.com/goagile/mongoshop/docs"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
+// @title Books API
+// @version 1.0
+// @description Books API for Golang Project.
+// @BasePath /api/v1
 var (
 	router *gin.Engine
 )
@@ -39,6 +47,11 @@ func Setup() {
 		c.HTML(http.StatusOK, "notfound.html", nil)
 	})
 
+	// API Docs
+	// url := ginSwagger.URL("http://127.0.0.1:8081/swagger/doc.json")
+	router.GET("/swagger/*any",
+		ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	// API
 	api := router.Group("api")
 	v1 := api.Group("v1")
@@ -52,7 +65,13 @@ func Run(uri string) {
 	router.Run(uri)
 }
 
-// GetBooks - GET /books
+// GetBooks godoc
+// @Summary Find Books
+// @Description Find All Books
+// @Tags books
+// @Produce json
+// @Success 200 {object} db.Book
+// @Router /books [get]
 func GetBooks(c *gin.Context) {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	books, err := db.FindBooks(ctx)

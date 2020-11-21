@@ -1,11 +1,6 @@
-# mongoshop
+## Swagger
 
-Пример онлайн магазина с использованием `Golang` и `MongoDB`.
+swag init -g ./server/server.go
 
-## Запрос продукта 
+go run main.go
 
-```js
-
-    curl --request GET http://127.0.0.1:8080/product/wheel-borrow-9092
-
-```

@@ -1,0 +1,45 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Books API for Golang Project.",
+        "title": "Books API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "basePath": "/api/v1",
+    "paths": {
+        "/books": {
+            "get": {
+                "description": "Find All Books",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "books"
+                ],
+                "summary": "Find Books",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/db.Book"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "db.Book": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
