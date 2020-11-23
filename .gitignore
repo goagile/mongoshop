@@ -1,6 +1,2 @@
-
-# executable files
-/shop
-
-# generated API docs
-/api/docs/*
+./shop
+./api/*
