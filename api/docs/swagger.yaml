@@ -1,7 +1,0 @@
-info:
-  contact: {}
-  title: Hello
-paths:
-  /books:
-    get: {}
-swagger: "2.0"
