@@ -3,5 +3,6 @@
 ./shop
 
 # generated API docs
-./api/docs
+./api/docs/
 ./api/docs/*
+./api/docs/**
