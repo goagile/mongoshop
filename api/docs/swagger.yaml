@@ -1,0 +1,8 @@
+basePath: /
+info:
+  contact: {}
+  description: Books AAAA API for Golang Project.
+  title: Books API 1.2
+  version: "1.2"
+paths: {}
+swagger: "2.0"

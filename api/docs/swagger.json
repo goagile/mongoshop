@@ -1,0 +1,11 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Books AAAA API for Golang Project.",
+        "title": "Books API 1.2",
+        "contact": {},
+        "version": "1.2"
+    },
+    "basePath": "/",
+    "paths": {}
+}
