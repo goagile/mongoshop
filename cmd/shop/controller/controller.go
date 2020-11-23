@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/goagile/mongoshop/cmd/shop/db"
+	"github.com/goagile/mongoshop/pkg/db"
 )
 
 type Controller struct{}
@@ -20,7 +20,7 @@ func New() *Controller {
 // @Summary Show all books
 // @Tags books
 // @Produce json
-// @Success 200 {array} db.Book
+// @Success 200 {array} map[string]interface{}
 // @Router /books [get]
 func (ctrl *Controller) GetBooks(c *gin.Context) {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)

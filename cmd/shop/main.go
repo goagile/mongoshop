@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/goagile/mongoshop/api/docs"
 	"github.com/goagile/mongoshop/cmd/shop/controller"
-	"github.com/goagile/mongoshop/cmd/shop/db"
+	"github.com/goagile/mongoshop/pkg/db"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
@@ -14,9 +14,9 @@ import (
 const (
 	DBURI  = "mongodb://127.0.0.1:27017"
 	SRVURI = ":8080"
-	TMPL   = "./cmd/shop/templates/*"
-	CSS    = "./cmd/shop/static/css"
-	JS     = "./cmd/shop/static/js"
+	TMPL   = "./web/templates/*"
+	CSS    = "./web/static/css"
+	JS     = "./web/static/js"
 )
 
 // @title Hello
