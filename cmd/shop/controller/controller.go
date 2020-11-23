@@ -17,6 +17,10 @@ func New() *Controller {
 }
 
 // GetBooks godoc
+// @Summary Show all books
+// @Tags books
+// @Produce json
+// @Success 200 {array} db.Book
 // @Router /books [get]
 func (ctrl *Controller) GetBooks(c *gin.Context) {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)

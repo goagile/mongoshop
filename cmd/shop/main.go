@@ -20,7 +20,7 @@ const (
 )
 
 // @title Hello
-// BasePath /api/v1
+// @BasePath /api/v1
 func main() {
 	ctx := context.Background()
 	db.Connect(ctx, DBURI)
