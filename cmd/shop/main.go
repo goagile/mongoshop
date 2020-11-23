@@ -2,23 +2,50 @@ package main
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/goagile/mongoshop/internal/db"
-	"github.com/goagile/mongoshop/internal/server"
+	"github.com/gin-gonic/gin"
+	_ "github.com/goagile/mongoshop/api/docs"
+	"github.com/goagile/mongoshop/cmd/shop/controller"
+	"github.com/goagile/mongoshop/cmd/shop/db"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 const (
 	DBURI  = "mongodb://127.0.0.1:27017"
 	SRVURI = ":8080"
+	TMPL   = "./cmd/shop/templates/*"
+	CSS    = "./cmd/shop/static/css"
+	JS     = "./cmd/shop/static/js"
 )
 
+// @title Hello
+// BasePath /api/v1
 func main() {
 	ctx := context.Background()
 	db.Connect(ctx, DBURI)
 	defer db.Disconnect(ctx)
 
-	server.Setup()
-	fmt.Println("Server start at:", SRVURI)
-	server.Run(SRVURI)
+	r := gin.New()
+	gin.SetMode(gin.DebugMode)
+	r.Use(gin.Logger())
+	r.Use(gin.Recovery())
+
+	r.LoadHTMLGlob(TMPL)
+	r.Static("/css", CSS)
+	r.Static("/js", JS)
+
+	c := controller.New()
+	r.NoRoute(c.NoRoute)
+	r.GET("/", c.Index)
+	r.GET("/books", c.Books)
+
+	api := r.Group("api")
+	v1 := api.Group("v1")
+	v1.GET("/books", c.GetBooks)
+
+	r.GET("/swagger/*any",
+		ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	r.Run(SRVURI)
 }

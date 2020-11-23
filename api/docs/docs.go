@@ -23,7 +23,11 @@ var doc = `{
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
-    "paths": {}
+    "paths": {
+        "/books": {
+            "get": {}
+        }
+    }
 }`
 
 type swaggerInfo struct {
@@ -37,12 +41,12 @@ type swaggerInfo struct {
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = swaggerInfo{
-	Version:     "1.2",
+	Version:     "",
 	Host:        "",
-	BasePath:    "/",
+	BasePath:    "",
 	Schemes:     []string{},
-	Title:       "Books API 1.2",
-	Description: "Books AAAA API for Golang Project.",
+	Title:       "Hello",
+	Description: "",
 }
 
 type s struct{}
