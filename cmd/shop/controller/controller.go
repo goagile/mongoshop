@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/goagile/mongoshop/pkg/db"
+	"github.com/goagile/mongoshop/pkg/book"
 )
 
 type Controller struct{}
@@ -23,14 +23,15 @@ func New() *Controller {
 // @Success 200 {array} map[string]interface{}
 // @Router /books [get]
 func (ctrl *Controller) GetBooks(c *gin.Context) {
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	books, err := db.FindBooks(ctx)
+	ctx := context.Background()
+	ctx, _ = context.WithTimeout(ctx, 10*time.Second)
+	bs, err := book.FindAll(ctx)
 	if err != nil {
-		log.Println("FindBooks", err)
+		log.Println("FindAll", err)
 		c.String(http.StatusNotFound, "books are not found")
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data": books})
+	c.JSON(http.StatusOK, gin.H{"items": bs})
 }
 
 func (ctrl *Controller) Index(c *gin.Context) {
