@@ -21,6 +21,7 @@ const (
 	TMPL    = "./web/templates/*"
 	CSS     = "./web/static/css"
 	JS      = "./web/static/js"
+	IMG     = "./web/static/img"
 )
 
 // @title Hello
@@ -57,6 +58,7 @@ func setupWebServer() *gin.Engine {
 	r.LoadHTMLGlob(TMPL)
 	r.Static("/css", CSS)
 	r.Static("/js", JS)
+	r.Static("/img", IMG)
 
 	c := controller.New()
 	r.NoRoute(c.NoRoute)

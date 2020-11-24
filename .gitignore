@@ -1,3 +1,4 @@
 /shop
-/api/*
+/api/**
 /api/docs/
+/web/static/img/**

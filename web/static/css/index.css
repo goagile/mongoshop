@@ -1,0 +1,36 @@
+
+
+/* books */
+.books-list {
+    list-style-type:none;
+}
+
+
+/* book */
+
+.book-item {
+    margin: 10px;
+}
+
+.book-item-cover,
+.book-item-price,
+.book-item-discount,
+.book-item-title,
+.book-item-authors,
+.book-item-puboffice,
+.book-item-to-cart {
+    display: block;
+}
+
+.book-item-author {
+    margin-right: 10px;
+}
+
+.book-cover-img {
+    /* width: 100%; */
+    height: 300px;
+}
+
+.books-empty { 
+    display: block;
+}

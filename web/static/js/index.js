@@ -15,7 +15,8 @@ var getBooks = (url) => {
         url: url,
         success: function(data, status) {
             console.log("getBooks", "data", data)
-            showBooks({})
+            // showBooks(data)
+            showBooks(booksForTest)
         },
         error: function(data, status) {
             console.log("getProduct", url, status)
@@ -60,6 +61,91 @@ var showBooksEmpty = () => {
 
 var bookItem = (b) => `
     <li class="book-item">
-        <a class="book-item-title" href=".">${b.title}</a>
-        <a class="book-item-author" href=".">${b.author}</a>
+        ${bookItemCover(b)}
+        <a class="book-item-price" href="${b.href}">${b.price}</a>
+        <a class="book-item-discount" href="${b.href}">${b.discount}</a>
+        <a class="book-item-title" href="${b.href}">${b.title}</a>
+        ${bookItemAuthors(b)}
+        ${bookItemPuboffice(b)}
+        <input class="book-item-to-cart" type="button" value="В КОРЗИНУ"></input>
     </li>`
+
+var bookItemCover = (b) => `
+    <a class="book-item-cover" href="${b.href}">
+        <img class="book-cover-img" 
+            src=${b.cover.href}
+            alt=${b.cover.title}
+            title=${b.cover.title}>
+        </img>
+    </a>`
+
+var bookItemAuthors = (b) => {
+    var s = ``
+    var authors = b.authors
+    for(var i = 0; i < authors.length; i++) {
+        var a = authors[i]
+        s += `<a class="book-item-author" href="${a.href}">${a.name}</a>`
+    }
+    return s
+}
+
+var bookItemPuboffice = (b) => {
+    var p = b.puboffice
+    return `
+        <a class="book-item-puboffice" href="${p.href}">
+            ${p.name}
+        </a>`
+}
+
+var booksForTest = {
+    "items": [
+        {
+            href: ".",
+            cover: {
+                href: "./img/razrabotka-web-react.jpg",
+                title: "Вайс, Хортон - Разработка веб-приложений в ReactJS"
+            },
+            price: 1800,
+            discount: 15,
+            title: "Разработка веб-приложений в ReactJS",
+            authors: [
+                {
+                    name: "Вайс",
+                    href: "."
+                },
+                {
+                    name: "Хортон",
+                    href: "."
+                }
+            ],
+            puboffice: {
+                name: "ДМК-Пресс",
+                href: "."
+            }
+        },
+        {
+            href: ".",
+            cover: {
+                href: "./img/nepreriv-razvertivanye.jpg",
+                title: "Хамбл, Фарли - Непрерывное развертывание ПО. Автоматизация процессов сборки, тестирования и внедрения новых версий"
+            },
+            price: 3440,
+            discount: 20,
+            title: "Непрерывное развертывание ПО. Автоматизация процессов сборки, тестирования и внедрения новых версий",
+            authors: [
+                {
+                    name: "Хамбл",
+                    href: "."
+                },
+                {
+                    name: "Фарли",
+                    href: "."
+                }
+            ],
+            puboffice: {
+                name: "Вильямс",
+                href: "."
+            }
+        }
+    ]
+}
