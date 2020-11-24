@@ -2,15 +2,12 @@ package main
 
 import (
 	"context"
-	"log"
-
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/goagile/mongoshop/api/docs"
 	"github.com/goagile/mongoshop/cmd/shop/controller"
 	"github.com/goagile/mongoshop/pkg/book"
+	"github.com/goagile/mongoshop/pkg/db"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
@@ -28,25 +25,13 @@ const (
 // @BasePath /api/v1
 func main() {
 	ctx := context.Background()
-	c := setupDBClient(ctx, DBAddr)
+	c := db.NewClient(ctx, DBAddr)
+	book.DB = c.Database("bookstore")
+	book.Books = book.DB.Collection("books")
 	defer c.Disconnect(ctx)
 
 	s := setupWebServer()
 	s.Run(SrvAddr)
-}
-
-func setupDBClient(ctx context.Context, uri string) *mongo.Client {
-	opts := options.Client().ApplyURI(uri)
-	c, err := mongo.NewClient(opts)
-	if err != nil {
-		log.Fatalf("DB %v err: %v", DBAddr, err)
-	}
-	if err := c.Connect(ctx); err != nil {
-		log.Fatalf("DB Connect:%v", err)
-	}
-	book.DB = c.Database("bookstore")
-	book.Books = book.DB.Collection("books")
-	return c
 }
 
 func setupWebServer() *gin.Engine {
