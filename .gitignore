@@ -1,2 +1,3 @@
-./shop
-./api/*
+/shop
+/api/*
+/api/docs/
