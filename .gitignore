@@ -1,4 +1,6 @@
 /shop
 /api/**
 /api/docs/
+
 /web/static/img/**
+!/web/static
